@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>14.1: Modular Structure Demo</title>
+  <style>
+    body { font-family: system-ui; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    .demo { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin: 1rem 0; }
+    .output { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; font-family: monospace; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h1>🟡 Task 14.1: Modular Code Structure</h1>
+  <p>Files organized by responsibility (see <code>js/</code> folder)</p>
+  
+  <div class="demo">
+    <h3>Test Utilities</h3>
+    <button onclick="testUtils()">Run Utils Tests</button>
+    <div class="output" id="utilsOutput">Click to test</div>
+  </div>
+
+  <div class="demo">
+    <h3>Test Storage Helpers</h3>
+    <button onclick="testStorage()">Save/Load Test Data</button>
+    <div class="output" id="storageOutput">Click to test</div>
+  </div>
+
+  <!-- Load modules in order -->
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Form Auto-Save with sessionStorage</title>
+  <style>
+    body { font-family: system-ui; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    .card { background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .form-group { margin-bottom: 1rem; }
+    label { display: block; margin-bottom: 0.25rem; font-weight: 500; }
+    input, textarea { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; }
+    textarea { min-height: 100px; resize: vertical; }
+    .btn { background: #3b82f6; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; cursor: pointer; }
+    .status { font-size: 0.9rem; color: #64748b; margin-top: 0.5rem; min-height: 1.2rem; }
+    .saved { color: #10b981; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>📝 Contact Form (Auto-Save)</h1>
+    <p><em>Type below → data auto-saves to sessionStorage. Refresh to test!</em></p>
+    
+    <form id="contactForm">
+      <div class="form-group">
+        <label for="name">Name *</label>
+        <input type="text" id="name" name="name" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email *</label>
+        <input type="email" id="email" name="email" required>
+      </div>
+      <div class="form-group">
+        <label for="message">Message *</label>
+        <textarea id="message" name="message" required></textarea>
+      </div>
+      <button type="submit" class="btn">Send Message</button>
+      <div class="status" id="status"></div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('contactForm');
+    const inputs = form.querySelectorAll('input, textarea');
+    const status = document.getElementById('status');
+
+    // 🔹 Load saved values on page load
+    inputs.forEach(input => {
+      const saved = sessionStorage.getItem(`form_${input.name}`);
+      if (saved) {
+        input.value = saved;
+        showStatus('✅ Restored from previous session', true);
+      }
+      
+      // 🔹 Auto-save on every input
+      input.addEventListener('input', () => {
+        sessionStorage.setItem(`form_${input.name}`, input.value);
+        showStatus('💾 Auto-saved', true);
+        
+        // Clear status after 2 seconds
+        setTimeout(() => {
+          if (status.textContent.includes('Auto-saved')) {
+            status.textContent = '';
+          }
+        }, 2000);
+      });
+    });
+
+    // 🔹 Clear on successful submit
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      // Simulate form submission
+      showStatus('🚀 Sending...', false);
+      
+      setTimeout(() => {
+        // Clear all form session data
+        inputs.forEach(input => {
+          sessionStorage.removeItem(`form_${input.name}`);
+        });
+        form.reset();
+        showStatus('✅ Sent! Form cleared.', true);
+        
+        // Optional: Clear status after 3 seconds
+        setTimeout(() => status.textContent = '', 3000);
+      }, 800);
+    });
+
+    function showStatus(message, isSuccess) {
+      status.textContent = message;
+      status.className = `status ${isSuccess ? 'saved' : ''}`;
+    }
+
+    // 🔹 Bonus: Warn if leaving with unsaved changes
+    window.addEventListener('beforeunload', (e) => {
+      const hasData = Array.from(inputs).some(input => 
+        input.value && !sessionStorage.getItem(`form_${input.name}`)
+      );
+      if (hasData) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  </script>
+</body>
+</html>

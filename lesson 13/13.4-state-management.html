@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>13.4: State Management Patterns</title>
+  <style>
+    body { font-family: system-ui; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .pattern { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; border-left: 4px solid #3b82f6; }
+    .pattern h3 { margin-top: 0; }
+    .state-display { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; font-family: monospace; white-space: pre-wrap; margin: 1rem 0; }
+    .controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 0.5rem 0; }
+    button { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; background: #e2e8f0; }
+    button:hover { background: #cbd5e1; }
+    .counter { font-size: 2rem; font-weight: bold; text-align: center; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <h1>🔴 Task 13.4: State Management Patterns</h1>
+
+  <div class="pattern">
+    <h3>📦 Exercise 1: Centralized State</h3>
+    <p>Single state object + save/load from localStorage</p>
+    
+    <div class="controls">
+      <button onclick="setState({theme: 'light'})">☀️ Light Theme</button>
+      <button onclick="setState({theme: 'dark'})">🌙 Dark Theme</button>
+      <button onclick="addTodoState('New task!')">➕ Add Todo</button>
+      <button onclick="toggleTodoState(1)">✅ Toggle Todo #1</button>
+    </div>
+    
+    <div class="state-display" id="stateDisplay">Loading state...</div>
+  </div>
+
+  <div class="pattern">
+    <h3>🔔 Exercise 2: Observer Pattern (Pub/Sub)</h3>
+    <p>State changes notify subscribers automatically</p>
+    
+    <div class="counter" id="countDisplay">0</div>
+    <div class="controls">
+      <button onclick="store.setState({count: store.getState().count + 1})">➕ Increment</button>
+      <button onclick="store.setState({count: store.getState().count - 1})">➖ Decrement</button>
+      <button onclick="toggleSubscription()">🔔 Toggle Listener</button>
+    </div>
+    
+    <div class="state-display" id="logDisplay">Subscribe to see logs...</div>
+  </div>
+
+  <script>
+    // 🔹 Exercise 1: Centralized State
+    const state = {
+      todos: [{ id: 1, text: 'Learn state management', completed: false }],
+      filter: 'all',
+      theme: 'light'
+    };
+
+    function setState(updates) {
+      Object.assign(state, updates);
+      saveState();
+      renderState();
+    }
+
+    function addTodoState(text) {
+      setState({
+        todos: [...state.todos, { 
+          id: Date.now(), 
+          text, 
+          completed: false,
+          createdAt: new Date().toISOString()
+        }]
+      });
+    }
+
+    function toggleTodoState(id) {
+      setState({
+        todos: state.todos.map(todo =>
+          todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        )
+      });
+    }
+
+    function saveState() {
+      localStorage.setItem('appState_demo', JSON.stringify(state));
+    }
+
+    function loadState() {
+      const saved = localStorage.getItem('appState_demo');
+      if (saved) {
+        Object.assign(state, JSON.parse(saved));
+      }
+    }
+
+    function renderState() {
+      document.getElementById('stateDisplay').textContent = 
+        JSON.stringify(state, null, 2);
+      
+      // Apply theme
+      document.body.style.background = state.theme === 'dark' ? '#1e293b' : '#f8fafc';
+      document.body.style.color = state.theme === 'dark' ? '#e2e8f0' : '#1e293b';
+    }
+
+    // 🔹 Exercise 2: Observer Pattern
+    const createStore = (initialState) => {
+      let state = initialState;
+      const listeners = [];
+      
+      return {
+        getState: () => state,
+        setState: (updates) => {
+          state = { ...state, ...updates };
+          listeners.forEach(listener => listener(state));
+        },
+        subscribe: (listener) => {
+          listeners.push(listener);
+          return () => {
+            const index = listeners.indexOf(listener);
+            if (index > -1) listeners.splice(index, 1);
+          };
+        }
+      };
+    };
+
+    const store = createStore({ count: 0 });
+    let isSubscribed = true;
+    const unsubscribe = store.subscribe(state => {
+      if (!isSubscribed) return;
+      document.getElementById('countDisplay').textContent = state.count;
+      document.getElementById('logDisplay').textContent = 
+        `🔔 State updated at ${new Date().toLocaleTimeString()}\n` +
+        `Current state: ${JSON.stringify(state)}`;
+    });
+
+    function toggleSubscription() {
+      isSubscribed = !isSubscribed;
+      document.getElementById('logDisplay').textContent = 
+        isSubscribed ? '🔔 Listening...' : '🔕 Listener paused';
+    }
+
+    // 🔹 Init
+    document.addEventListener('DOMContentLoaded', () => {
+      loadState();
+      renderState();
+      // Initial render for observer
+      store.setState({}); // Triggers subscriber
+    });
+  </script>
+</body>
+</html>

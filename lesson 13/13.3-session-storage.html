@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>13.3: Session vs Local Storage</title>
+  <style>
+    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .panel { background: #f8fafc; padding: 1rem; border-radius: 8px; }
+    .panel h3 { margin-top: 0; }
+    .output { background: #1e293b; color: #e2e8f0; padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.9rem; min-height: 60px; }
+    .note { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem; margin: 1rem 0; border-radius: 0 4px 4px 0; }
+  </style>
+</head>
+<body>
+  <h1>🟡 Task 13.3: Session Storage vs Local Storage</h1>
+  
+  <div class="note">
+    💡 <strong>Key Difference:</strong><br>
+    • <code>localStorage</code>: Persists until explicitly cleared (days/years)<br>
+    • <code>sessionStorage</code>: Cleared when tab/window closes (minutes/hours)
+  </div>
+
+  <div class="comparison">
+    <div class="panel">
+      <h3>🗄️ localStorage (Persistent)</h3>
+      <input type="text" id="localInput" placeholder="Enter value..." style="width:100%;padding:0.5rem;margin:0.5rem 0">
+      <button onclick="saveLocal()">Save</button>
+      <button onclick="loadLocal()">Load</button>
+      <button onclick="clearLocal()">Clear</button>
+      <div class="output" id="localOutput">Click Load to see value</div>
+    </div>
+    
+    <div class="panel">
+      <h3>🔄 sessionStorage (Temporary)</h3>
+      <input type="text" id="sessionInput" placeholder="Enter value..." style="width:100%;padding:0.5rem;margin:0.5rem 0">
+      <button onclick="saveSession()">Save</button>
+      <button onclick="loadSession()">Load</button>
+      <button onclick="clearSession()">Clear</button>
+      <div class="output" id="sessionOutput">Click Load to see value</div>
+    </div>
+  </div>
+
+  <div class="note">
+    🔍 <strong>Test it:</strong> Save values in both, then <em>refresh the page</em>. 
+    localStorage value will remain; sessionStorage will be gone!
+  </div>
+
+  <script>
+    // localStorage demos
+    function saveLocal() {
+      const val = document.getElementById('localInput').value;
+      localStorage.setItem('demo_local', val);
+      document.getElementById('localOutput').textContent = `✅ Saved: "${val}"`;
+    }
+    function loadLocal() {
+      const val = localStorage.getItem('demo_local');
+      document.getElementById('localOutput').textContent = val ? `📥 "${val}"` : '⚠️ Nothing saved yet';
+    }
+    function clearLocal() {
+      localStorage.removeItem('demo_local');
+      document.getElementById('localOutput').textContent = '🗑️ Cleared';
+    }
+
+    // sessionStorage demos
+    function saveSession() {
+      const val = document.getElementById('sessionInput').value;
+      sessionStorage.setItem('demo_session', val);
+      document.getElementById('sessionOutput').textContent = `✅ Saved: "${val}"`;
+    }
+    function loadSession() {
+      const val = sessionStorage.getItem('demo_session');
+      document.getElementById('sessionOutput').textContent = val ? `📥 "${val}"` : '⚠️ Nothing saved yet';
+    }
+    function clearSession() {
+      sessionStorage.removeItem('demo_session');
+      document.getElementById('sessionOutput').textContent = '🗑️ Cleared';
+    }
+  </script>
+</body>
+</html>

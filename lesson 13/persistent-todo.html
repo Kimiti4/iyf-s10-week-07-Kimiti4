@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Persistent To-Do List</title>
+  <style>
+    :root { --bg: #f8fafc; --card: #fff; --primary: #3b82f6; --success: #10b981; --danger: #ef4444; }
+    body { font-family: system-ui; background: var(--bg); padding: 2rem; }
+    .container { max-width: 600px; margin: 0 auto; }
+    .card { background: var(--card); padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+    .input-group { display: flex; gap: 0.5rem; }
+    input[type="text"] { flex: 1; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; }
+    .btn { padding: 0.75rem 1.25rem; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.85rem; }
+    .todo-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-bottom: 1px solid #e2e8f0; }
+    .todo-item:last-child { border-bottom: none; }
+    .todo-item.completed span { text-decoration: line-through; color: #94a3b8; }
+    .todo-checkbox { width: 1.25rem; height: 1.25rem; cursor: pointer; }
+    .filters { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+    .filter-btn { background: #e2e8f0; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; }
+    .filter-btn.active { background: var(--primary); color: white; }
+    .empty { text-align: center; color: #94a3b8; padding: 1.5rem; }
+    .stats { font-size: 0.9rem; color: #64748b; margin-top: 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>✅ Persistent To-Do List</h1>
+    <p><em>Tasks survive page refresh with localStorage</em></p>
+    
+    <div class="card">
+      <div class="input-group">
+        <input type="text" id="todoInput" placeholder="Add a new task..." onkeypress="if(event.key==='Enter')addTodo()">
+        <button class="btn btn-primary" onclick="addTodo()">Add</button>
+      </div>
+      
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all" onclick="setFilter('all')">All</button>
+        <button class="filter-btn" data-filter="active" onclick="setFilter('active')">Active</button>
+        <button class="filter-btn" data-filter="completed" onclick="setFilter('completed')">Completed</button>
+      </div>
+      
+      <div id="todoList"></div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+
+  <script>
+    // 🔹 Storage Helpers
+    const STORAGE_KEY = "todos_v1";
+    const FILTER_KEY = "todos_filter_v1";
+    
+    const saveToStorage = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+    const getFromStorage = (key, defaultValue) => {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : defaultValue;
+    };
+
+    // 🔹 State
+    let currentFilter = getFromStorage(FILTER_KEY, "all");
+
+    // 🔹 CRUD Operations
+    function loadTodos() { return getFromStorage(STORAGE_KEY, []); }
+    function saveTodos(todos) {
+      saveToStorage(STORAGE_KEY, todos);
+      renderTodos();
+      updateStats();
+    }
+    function addTodo() {
+      const input = document.getElementById('todoInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const newTodo = {
+        id: Date.now(),
+        text,
+        completed: false,
+        createdAt: new Date().toISOString()
+      };
+      
+      const todos = loadTodos();
+      todos.push(newTodo);
+      saveTodos(todos);
+      input.value = '';
+    }
+    function toggleTodo(id) {
+      const todos = loadTodos().map(t => 
+        t.id === id ? { ...t, completed: !t.completed } : t
+      );
+      saveTodos(todos);
+    }
+    function deleteTodo(id) {
+      const todos = loadTodos().filter(t => t.id !== id);
+      saveTodos(todos);
+    }
+    function clearCompleted() {
+      const todos = loadTodos().filter(t => !t.completed);
+      saveTodos(todos);
+    }
+
+    // 🔹 Filter & Render
+    function setFilter(filter) {
+      currentFilter = filter;
+      saveToStorage(FILTER_KEY, filter);
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === filter);
+      });
+      renderTodos();
+    }
+    function getFilteredTodos() {
+      const todos = loadTodos();
+      if (currentFilter === 'active') return todos.filter(t => !t.completed);
+      if (currentFilter === 'completed') return todos.filter(t => t.completed);
+      return todos;
+    }
+    function renderTodos() {
+      const list = document.getElementById('todoList');
+      const todos = getFilteredTodos();
+      
+      if (todos.length === 0) {
+        list.innerHTML = `<div class="empty">${
+          currentFilter === 'all' ? '📭 No tasks yet. Add one above!' :
+          currentFilter === 'active' ? '✅ All tasks completed!' :
+          '🎉 No completed tasks yet'
+        }</div>`;
+        return;
+      }
+      
+      list.innerHTML = todos.map(todo => `
+        <div class="todo-item ${todo.completed ? 'completed' : ''}">
+          <input type="checkbox" class="todo-checkbox" 
+                 ${todo.completed ? 'checked' : ''} 
+                 onchange="toggleTodo(${todo.id})">
+          <span style="flex:1">${todo.text}</span>
+          <button class="btn btn-sm" style="background:#f1f5f9" onclick="deleteTodo(${todo.id})">🗑️</button>
+        </div>
+      `).join('');
+      
+      // Show clear button if any completed
+      if (loadTodos().some(t => t.completed)) {
+        list.innerHTML += `<div style="text-align:right;margin-top:0.5rem">
+          <button class="btn btn-sm" onclick="clearCompleted()">Clear Completed</button>
+        </div>`;
+      }
+    }
+    function updateStats() {
+      const todos = loadTodos();
+      const active = todos.filter(t => !t.completed).length;
+      const completed = todos.length - active;
+      document.getElementById('stats').textContent = 
+        `${active} active • ${completed} completed • ${todos.length} total`;
+    }
+
+    // 🔹 Init
+    document.addEventListener('DOMContentLoaded', () => {
+      // Restore filter UI
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === currentFilter);
+      });
+      renderTodos();
+      updateStats();
+    });
+  </script>
+</body>
+</html>

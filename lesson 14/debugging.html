@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>14.3: Debugging Skills</title>
+  <style>
+    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .exercise { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+    .console-output { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; font-family: monospace; white-space: pre-wrap; margin: 1rem 0; min-height: 100px; }
+    .tip { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 0.75rem; margin: 1rem 0; border-radius: 0 4px 4px 0; }
+    button { padding: 0.5rem 1rem; margin: 0.25rem; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>🟡 Task 14.3: Debugging Skills</h1>
+
+  <div class="exercise">
+    <h3>✅ Exercise 1: Console Methods</h3>
+    <button onclick="demoConsole()">Run Console Demo</button>
+    <p><em>Open DevTools Console to see full output</em></p>
+  </div>
+
+  <div class="exercise">
+    <h3>✅ Exercise 2: Debugging Checklist</h3>
+    <ul>
+      <li>🔍 Reproduce the bug consistently</li>
+      <li>📋 Check console for errors/warnings</li>
+      <li>🪲 Use <code>debugger;</code> statement or DevTools breakpoints</li>
+      <li>🧪 Test edge cases (empty input, null values, etc.)</li>
+      <li>📝 Add temporary <code>console.log</code> to trace execution</li>
+      <li>🔄 Isolate: Comment out sections to find culprit</li>
+    </ul>
+  </div>
+
+  <div class="exercise">
+    <h3>✅ Exercise 3: Debug This Code</h3>
+    <p>Find and fix all bugs in the order calculator below:</p>
+    
+    <pre id="codeDisplay" style="background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:6px;overflow-x:auto">
+function calculateOrderTotal(items) {
+    let total = 0;
+    
+    for (let i = 0; i <= items.length; i++) {
+        const item = items[i];
+        total += item.price * item.quanity;
+    }
+    
+    if (total > 100) {
+        total = total * 0.9;  // 10% discount
+    }
+    
+    return total;
+}
+
+const order = [
+    { name: "Book", price: 15, quantity: 2 },
+    { name: "Pen", price: 3, quantity: 5 },
+    { name: "Notebook", price: 8, quantity: 3 }
+];
+
+console.log(calculateOrderTotal(order));
+// Expected: 69 (before discount) or 62.1 (after discount)
+// Actual: ???</pre>
+    
+    <button onclick="runBuggy()">🐞 Run Buggy Version</button>
+    <button onclick="runFixed()">✅ Run Fixed Version</button>
+    <button onclick="showSolution()">💡 Show Solution</button>
+    
+    <div class="console-output" id="debugOutput">Click a button to test</div>
+    
+    <div class="tip">
+      🔍 <strong>Bugs to find:</strong><br>
+      1. Loop condition: <code>i &lt;= items.length</code> → should be <code>&lt;</code><br>
+      2. Typo: <code>item.quanity</code> → should be <code>item.quantity</code><br>
+      3. (Bonus) Floating point precision: round to 2 decimals
+    </div>
+  </div>
+
+  <script>
+    // 🔴 Buggy version
+    function calculateOrderTotal_BUGGY(items) {
+      let total = 0;
+      for (let i = 0; i <= items.length; i++) { // Bug 1: off-by-one
+        const item = items[i]; // When i === items.length, item is undefined
+        total += item.price * item.quanity; // Bug 2: typo + undefined access
+      }
+      if (total > 100) total = total * 0.9;
+      return total;
+    }
+
+    // ✅ Fixed version
+    function calculateOrderTotal_FIXED(items) {
+      const DISCOUNT_THRESHOLD = 100;
+      const DISCOUNT_RATE = 0.9;
+      
+      let total = 0;
+      for (let i = 0; i < items.length; i++) { // Fixed: < instead of <=
+        const item = items[i];
+        total += item.price * item.quantity; // Fixed: quantity spelling
+      }
+      
+      if (total > DISCOUNT_THRESHOLD) {
+        total = total * DISCOUNT_RATE;
+      }
+      
+      return Math.round(total * 100) / 100; // Round to 2 decimals
+    }
+
+    const testOrder = [
+      { name: "Book", price: 15, quantity: 2 },    // 30
+      { name: "Pen", price: 3, quantity: 5 },       // 15
+      { name: "Notebook", price: 8, quantity: 3 }   // 24
+      // Total: 69 → no discount → expected: 69.00
+    ];
+
+    window.demoConsole = function() {
+      console.log("🔹 Basic log");
+      console.warn("⚠️ This is a warning");
+      console.error("❌ This is an error");
+      console.table(testOrder);
+      console.group("Order Calculation");
+      console.log("Step 1: Sum items");
+      console.log("Step 2: Apply discount if > $100");
+      console.groupEnd();
+      console.time("Calculation");
+      const result = calculateOrderTotal_FIXED(testOrder);
+      console.timeEnd("Calculation");
+      console.assert(result === 69, "Result should be 69");
+    };
+
+    window.runBuggy = function() {
+      const output = document.getElementById('debugOutput');
+      try {
+        const result = calculateOrderTotal_BUGGY(testOrder);
+        output.textContent = `❌ Buggy result: ${result}\n💥 Expected error or NaN due to bugs`;
+      } catch (error) {
+        output.textContent = `💥 Error caught: ${error.message}\n\nThis is expected! The buggy code has:` +
+          `\n1. Off-by-one loop (i <= length)` +
+          `\n2. Typo: 'quanity' instead of 'quantity'`;
+      }
+    };
+
+    window.runFixed = function() {
+      const output = document.getElementById('debugOutput');
+      const result = calculateOrderTotal_FIXED(testOrder);
+      const expected = 69.00;
+      output.textContent = `✅ Fixed result: $${result}\n🎯 Expected: $${expected}\n${
+        Math.abs(result - expected) < 0.01 ? '✅ PASS' : '❌ FAIL'
+      }`;
+    };
+
+    window.showSolution = function() {
+      document.getElementById('codeDisplay').innerHTML = `<pre>
+// ✅ Fixed and improved version
+function calculateOrderTotal(items) {
+  // Named constants for magic numbers
+  const DISCOUNT_THRESHOLD = 100;
+  const DISCOUNT_RATE = 0.9;
+  
+  let total = 0;
+  
+  // Fixed: use < instead of <= to avoid undefined access
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    // Fixed: correct property name 'quantity'
+    total += item.price * item.quantity;
+  }
+  
+  // Apply discount if threshold met
+  if (total > DISCOUNT_THRESHOLD) {
+    total = total * DISCOUNT_RATE;
+  }
+  
+  // Round to 2 decimal places for currency
+  return Math.round(total * 100) / 100;
+}</pre>`;
+    };
+  </script>
+</body>
+</html>

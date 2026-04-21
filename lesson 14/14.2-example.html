@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>14.2: Clean Code Practices</title>
+  <style>
+    body { font-family: system-ui; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    .example { background: #f8fafc; padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem; }
+    .example h3 { margin-top: 0; }
+    .code-comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .bad { border-left: 4px solid #ef4444; }
+    .good { border-left: 4px solid #10b981; }
+    pre { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; overflow-x: auto; font-size: 0.9rem; }
+    .label { font-weight: 600; margin-bottom: 0.5rem; display: block; }
+    .bad .label { color: #ef4444; }
+    .good .label { color: #10b981; }
+  </style>
+</head>
+<body>
+  <h1>🟡 Task 14.2: Clean Code Practices</h1>
+
+  <div class="example">
+    <h3>✅ Exercise 1: Meaningful Names</h3>
+    <div class="code-comparison">
+      <div class="bad">
+        <span class="label">❌ BAD</span>
+        <pre>
+const d = new Date();
+const x = users.filter(u => u.a > 18);
+function calc(a, b) { return a * b * 0.1; }</pre>
+      </div>
+      <div class="good">
+        <span class="label">✅ GOOD</span>
+        <pre>
+const currentDate = new Date();
+const adultUsers = users.filter(user => user.age > 18);
+function calculateDiscount(price, quantity) {
+  const DISCOUNT_RATE = 0.1;
+  return price * quantity * DISCOUNT_RATE;
+}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="example">
+    <h3>✅ Exercise 2: Single Responsibility</h3>
+    <p>Functions should do ONE thing. Break complex functions into smaller, testable pieces.</p>
+    <details>
+      <summary>🔍 View refactored example</summary>
+      <pre>
+// ✅ Separated concerns
+function validateUser(userData) {
+  if (!userData.email.includes("@")) throw new Error("Invalid email");
+  if (userData.age < 18) throw new Error("Must be adult");
+  return true;
+}
+
+function normalizeUser(userData) {
+  return {
+    ...userData,
+    email: userData.email.toLowerCase(),
+    name: userData.name.trim()
+  };
+}
+
+async function createUser(userData) {
+  validateUser(userData);
+  const normalizedUser = normalizeUser(userData);
+  await database.save(normalizedUser);
+  await emailService.sendWelcome(normalizedUser.email);
+  return normalizedUser;
+}</pre>
+    </details>
+  </div>
+
+  <div class="example">
+    <h3>✅ Exercise 3: Avoid Magic Numbers</h3>
+    <div class="code-comparison">
+      <div class="bad">
+        <span class="label">❌ BAD</span>
+        <pre>
+if (password.length < 8) { }
+setTimeout(callback, 86400000);
+if (response.status === 404) { }</pre>
+      </div>
+      <div class="good">
+        <span class="label">✅ GOOD</span>
+        <pre>
+const MIN_PASSWORD_LENGTH = 8;
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const HTTP_NOT_FOUND = 404;
+
+if (password.length < MIN_PASSWORD_LENGTH) { }
+setTimeout(callback, ONE_DAY_MS);
+if (response.status === HTTP_NOT_FOUND) { }</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="example">
+    <h3>🧪 Interactive: Fix the Buggy Code</h3>
+    <p>Find and fix bugs in this order calculator:</p>
+    <pre id="buggyCode">
+function calculateOrderTotal(items) {
+    let total = 0;
+    
+    for (let i = 0; i <= items.length; i++) {  // 🔴 Bug 1
+        const item = items[i];
+        total += item.price * item.quanity;     // 🔴 Bug 2 (typo)
+    }
+    
+    if (total > 100) {
+        total = total * 0.9;  // 10% discount
+    }
+    
+    return total;
+}</pre>
+    
+    <button onclick="fixBugs()">✨ Auto-Fix Bugs</button>
+    <button onclick="runTest()">🧪 Run Test</button>
+    
+    <div class="output" id="testOutput" style="background:#1e293b;color:#e2e8f0;padding:1rem;border-radius:6px;margin-top:1rem;font-family:monospace;white-space:pre-wrap"></div>
+  </div>
+
+  <script>
+    // 🔴 Original buggy function
+    function calculateOrderTotal_BUGGY(items) {
+      let total = 0;
+      for (let i = 0; i <= items.length; i++) { // Bug 1: should be < not <=
+        const item = items[i];
+        total += item.price * item.quanity; // Bug 2: typo "quanity"
+      }
+      if (total > 100) total = total * 0.9;
+      return total;
+    }
+
+    // ✅ Fixed version
+    function calculateOrderTotal(items) {
+      const DISCOUNT_THRESHOLD = 100;
+      const DISCOUNT_RATE = 0.9;
+      
+      let total = 0;
+      for (let i = 0; i < items.length; i++) { // Fixed: < instead of <=
+        const item = items[i];
+        total += item.price * item.quantity; // Fixed: quantity spelling
+      }
+      
+      if (total > DISCOUNT_THRESHOLD) {
+        total = total * DISCOUNT_RATE;
+      }
+      
+      return Math.round(total * 100) / 100; // Round to 2 decimals
+    }
+
+    const testOrder = [
+      { name: "Book", price: 15, quantity: 2 },    // 30
+      { name: "Pen", price: 3, quantity: 5 },       // 15
+      { name: "Notebook", price: 8, quantity: 3 }   // 24
+      // Total: 69 → no discount → expected: 69.00
+    ];
+
+    window.fixBugs = function() {
+      document.getElementById('buggyCode').innerHTML = `<pre>
+function calculateOrderTotal(items) {
+  const DISCOUNT_THRESHOLD = 100;
+  const DISCOUNT_RATE = 0.9;
+  
+  let total = 0;
+  for (let i = 0; i < items.length; i++) { // ✅ Fixed loop condition
+    const item = items[i];
+    total += item.price * item.quantity; // ✅ Fixed property name
+  }
+  
+  if (total > DISCOUNT_THRESHOLD) {
+    total = total * DISCOUNT_RATE;
+  }
+  
+  return Math.round(total * 100) / 100; // ✅ Round to cents
+}</pre>`;
+    };
+
+    window.runTest = function() {
+      const output = document.getElementById('testOutput');
+      try {
+        const result = calculateOrderTotal(testOrder);
+        const expected = 69.00;
+        const passed = Math.abs(result - expected) < 0.01;
+        
+        output.textContent = `Order: ${JSON.stringify(testOrder, null, 2)}\n` +
+                           `Calculated: $${result}\n` +
+                           `Expected: $${expected}\n` +
+                           `Status: ${passed ? '✅ PASS' : '❌ FAIL'}`;
+      } catch (error) {
+        output.textContent = `❌ Error: ${error.message}`;
+      }
+    };
+  </script>
+</body>
+</html>

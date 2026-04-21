@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>13.1: Local Storage Basics</title>
+  <style>
+    body { font-family: system-ui; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    .demo { background: #f8fafc; padding: 1rem; border-radius: 8px; margin: 1rem 0; }
+    button { padding: 0.5rem 1rem; margin: 0.25rem; cursor: pointer; }
+    .output { background: #1e293b; color: #e2e8f0; padding: 1rem; border-radius: 6px; font-family: monospace; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>🟢 Task 13.1: Local Storage Basics</h1>
+  
+  <div class="demo">
+    <h3>Exercise 1: Simple Values</h3>
+    <button onclick="setItem()">Set Username</button>
+    <button onclick="getItem()">Get Username</button>
+    <button onclick="removeItem()">Remove</button>
+    <button onclick="clearAll()">Clear All</button>
+    <div class="output" id="output1">Click a button to test</div>
+  </div>
+
+  <div class="demo">
+    <h3>Exercise 2: Objects with JSON</h3>
+    <button onclick="saveUser()">Save User Object</button>
+    <button onclick="loadUser()">Load User Object</button>
+    <div class="output" id="output2">Try saving/loading a user</div>
+  </div>
+
+  <div class="demo">
+    <h3>Exercise 3: Helper Functions</h3>
+    <button onclick="saveSettings()">Save Settings</button>
+    <button onclick="loadSettings()">Load Settings</button>
+    <div class="output" id="output3">Helper functions demo</div>
+  </div>
+
+  <script>
+    // 🔹 Exercise 1: Basic localStorage
+    function setItem() {
+      localStorage.setItem("username", "John");
+      document.getElementById('output1').textContent = '✅ Set username: "John"';
+    }
+    function getItem() {
+      const username = localStorage.getItem("username");
+      document.getElementById('output1').textContent = `📥 Retrieved: ${username || 'null'}`;
+    }
+    function removeItem() {
+      localStorage.removeItem("username");
+      document.getElementById('output1').textContent = '🗑️ Removed username';
+    }
+    function clearAll() {
+      localStorage.clear();
+      document.getElementById('output1').textContent = '🧹 Cleared all localStorage';
+    }
+
+    // 🔹 Exercise 2: Objects with JSON
+    function saveUser() {
+      const user = {
+        name: "John",
+        age: 30,
+        hobbies: ["coding", "reading", "gaming"]
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+      document.getElementById('output2').textContent = '✅ Saved user object (stringified)';
+    }
+    function loadUser() {
+      const data = localStorage.getItem("user");
+      if (!data) {
+        document.getElementById('output2').textContent = '⚠️ No user found in storage';
+        return;
+      }
+      const user = JSON.parse(data);
+      document.getElementById('output2').textContent = `📥 Loaded:\n${JSON.stringify(user, null, 2)}`;
+    }
+
+    // 🔹 Exercise 3: Helper Functions
+    function saveToStorage(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    function getFromStorage(key, defaultValue = null) {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : defaultValue;
+    }
+    function removeFromStorage(key) {
+      localStorage.removeItem(key);
+    }
+
+    function saveSettings() {
+      saveToStorage("settings", { theme: "dark", fontSize: 16, notifications: true });
+      document.getElementById('output3').textContent = '✅ Saved settings via helper';
+    }
+    function loadSettings() {
+      const settings = getFromStorage("settings", { theme: "light", fontSize: 14 });
+      document.getElementById('output3').textContent = `📥 Settings:\n${JSON.stringify(settings, null, 2)}`;
+    }
+  </script>
+</body>
+</html>

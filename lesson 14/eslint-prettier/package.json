@@ -1,0 +1,17 @@
+{
+  "name": "iyf-week-04-linting",
+  "version": "1.0.0",
+  "description": "ESLint + Prettier config for JavaScript projects",
+  "scripts": {
+    "lint": "eslint lesson-13/ lesson-14/ refactored-todo/ --ext .js",
+    "lint:fix": "eslint lesson-13/ lesson-14/ refactored-todo/ --ext .js --fix",
+    "format": "prettier --write \"**/*.{js,html,css,json,md}\"",
+    "check": "npm run lint && prettier --check \"**/*.{js,html,css,json,md}\""
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5"
+  },
+  "keywords": ["javascript", "eslint", "prettier", "code-quality"],
+  "license": "MIT"
+}

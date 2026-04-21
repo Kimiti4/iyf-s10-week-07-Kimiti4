@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Notes App - LocalStorage</title>
+  <style>
+    :root { --bg: #f8fafc; --card: #fff; --primary: #3b82f6; --text: #1e293b; }
+    body { font-family: system-ui; background: var(--bg); color: var(--text); padding: 2rem; }
+    .container { max-width: 700px; margin: 0 auto; }
+    .card { background: var(--card); padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 1.5rem; }
+    textarea { width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; resize: vertical; }
+    .btn { background: var(--primary); color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer; margin-right: 0.5rem; }
+    .btn:hover { opacity: 0.9; }
+    .btn-danger { background: #ef4444; }
+    .note { padding: 1rem; border-left: 4px solid var(--primary); background: #f1f5f9; margin: 0.5rem 0; border-radius: 0 6px 6px 0; }
+    .note-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; }
+    .note-time { font-size: 0.8rem; color: #64748b; }
+    .empty { text-align: center; color: #94a3b8; padding: 2rem; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📝 Notes App</h1>
+    <p><em>Notes persist automatically with localStorage</em></p>
+    
+    <div class="card">
+      <textarea id="noteInput" placeholder="Write a note..."></textarea>
+      <div style="margin-top: 0.75rem;">
+        <button class="btn" onclick="addNote()">➕ Add Note</button>
+        <button class="btn btn-danger" onclick="clearAllNotes()">🗑️ Clear All</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Your Notes</h3>
+      <div id="notesList"></div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "notes_app_v1";
+
+    // 🔹 Helper Functions
+    function saveToStorage(key, data) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+    function getFromStorage(key, defaultValue = []) {
+      const data = localStorage.getItem(key);
+      return data ? JSON.parse(data) : defaultValue;
+    }
+
+    // 🔹 Notes Logic
+    function loadNotes() {
+      return getFromStorage(STORAGE_KEY, []);
+    }
+    function saveNotes(notes) {
+      saveToStorage(STORAGE_KEY, notes);
+      renderNotes();
+    }
+    function addNote() {
+      const input = document.getElementById('noteInput');
+      const text = input.value.trim();
+      if (!text) return alert("Please write something!");
+      
+      const note = {
+        id: Date.now(),
+        text,
+        createdAt: new Date().toISOString()
+      };
+      
+      const notes = loadNotes();
+      notes.unshift(note); // Add to top
+      saveNotes(notes);
+      input.value = '';
+    }
+    function deleteNote(id) {
+      const notes = loadNotes().filter(note => note.id !== id);
+      saveNotes(notes);
+    }
+    function clearAllNotes() {
+      if (confirm("Delete all notes?")) {
+        saveNotes([]);
+      }
+    }
+    function formatTime(iso) {
+      return new Date(iso).toLocaleString();
+    }
+
+    // 🔹 Render
+    function renderNotes() {
+      const list = document.getElementById('notesList');
+      const notes = loadNotes();
+      
+      if (notes.length === 0) {
+        list.innerHTML = '<div class="empty">📭 No notes yet. Start writing!</div>';
+        return;
+      }
+      
+      list.innerHTML = notes.map(note => `
+        <div class="note">
+          <div class="note-header">
+            <strong>Note #${note.id.toString().slice(-4)}</strong>
+            <span class="note-time">${formatTime(note.createdAt)}</span>
+          </div>
+          <div>${note.text.replace(/\n/g, '<br>')}</div>
+          <button class="btn btn-danger" style="margin-top:0.5rem;font-size:0.8rem" 
+                  onclick="deleteNote(${note.id})">🗑️ Delete</button>
+        </div>
+      `).join('');
+    }
+
+    // 🔹 Init
+    document.addEventListener('DOMContentLoaded', renderNotes);
+    
+    // Auto-save on Ctrl+Enter
+    document.getElementById('noteInput').addEventListener('keydown', e => {
+      if (e.ctrlKey && e.key === 'Enter') addNote();
+    });
+  </script>
+</body>
+</html>
