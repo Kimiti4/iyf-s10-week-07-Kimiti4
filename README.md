@@ -61,10 +61,16 @@ A comprehensive JavaScript practice repository covering core language fundamenta
    git clone https://github.com/Kimiti4/iyf-s10-week-07-Kimiti4.git
    cd iyf-s10-week-07-Kimiti4
 ## Live Demo
-[Form] (https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/form-autosave.html)
-[Notes App] (https://kimiti4.github.io/lesson13/notes-app.html/)
-[ToDo List] (https://kimiti4.github.io/lesson13/persistent-todo.html/)
-[Session Storage](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/13.3-session-storage.html)
-[](https://kimiti4.github.io/)
-[](https://kimiti4.github.io/)
-(https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/local-storage-basics.html)
+[Form](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/form-autosave.html)
+[Notes App](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/notes-app.html)
+[ToDo List](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/persistent-todo.html)
+[Task 13.3](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/13.3-session-storage.html)
+[Task 13.4](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/13.4-state-management.html)
+[Shopping Cart](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/shopping-cart.html)
+[Local Storage](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/local-storage-basics.html)
+
+### lesson14
+[Task 14.2](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson14/14.2-example.html)
+[Debug ](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson14/debugging.html)
+[Task 14.1](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson14/14.1-structure/index.html)
+[Refactored ToDo](https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson14/refactored-todo/index.html)
