@@ -57,6 +57,14 @@ A comprehensive JavaScript practice repository covering core language fundamenta
 ## How to Run
 ### Option 1: Open Directly
 1. Clone this repository
-   ```bash
+   ```bash```
    git clone https://github.com/Kimiti4/iyf-s10-week-07-Kimiti4.git
    cd iyf-s10-week-07-Kimiti4
+## Live Demo
+[Form] (https://kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/form-autosave.html/)
+[Notes App] (https://kimiti4.github.io/lesson13/notes-app.html/)
+[ToDo List] (https://kimiti4.github.io/lesson13/persistent-todo.html/)
+[](https://kimiti4.github.io/)
+[](https://kimiti4.github.io/)
+[](https://kimiti4.github.io/)
+(https://github.com/Kimiti4.github.io/iyf-s10-week-07-Kimiti4/lesson13/local-storage-basics.html)
